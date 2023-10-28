@@ -1,3 +1,5 @@
 <script setup></script>
-<template></template>
+<template>
+  <div>I am HOME page.{{ $globalVar }}</div>
+</template>
 <style scoped></style>
