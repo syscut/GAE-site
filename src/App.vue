@@ -1,11 +1,16 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import FireFly from "./components/FireFly.vue";
 import axios from "axios";
 import router from "./router.js";
 import { Quasar } from "quasar";
+//variables---------------------
+const test = ref("aaaa");
 const breakSize = ref(800);
 const leftDrawerOpen = ref(false);
 const width = ref(window.innerWidth);
+const height = ref(window.innerHeight - 50);
+const headerNotHide = ref(true);
 const errDialog = ref(false);
 const searchText = ref("");
 const errMessage = ref("");
@@ -16,28 +21,35 @@ const menuItems = ref([
   { id: 3, name: "separator", icon: "none" },
   { id: 4, name: "登入", icon: "login" },
 ]);
+//setting---------------------
 onMounted(() => {
-  axios
-    .get("today")
-    .then((r) => {
-      console.log(r.data);
-    })
-    .catch((e) => {
-      showErrorMessage(e);
-    });
+  // axios
+  //   .get("today")
+  //   .then((r) => {
+  //     console.log(r.data);
+  //   })
+  //   .catch((e) => {
+  //     showErrorMessage(e);
+  //   });
 });
-const reload = (p) => {
-  router.push(p);
-};
+window.addEventListener("resize", (e) => {
+  width.value = window.innerWidth;
+  height.value = window.innerHeight;
+});
+//computed---------------------
 const lessThanBreakPoint = computed(() => {
   return width.value < breakSize.value;
 });
 const hideTitle = computed(() => {
   return width.value < 450;
 });
-window.addEventListener("resize", (e) => {
-  width.value = window.innerWidth;
-});
+//function--------------------
+const reload = (p) => {
+  router.push("/");
+};
+const headerHide = (notHide) => {
+  headerNotHide.value = notHide;
+};
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
 };
@@ -55,10 +67,16 @@ const showErrorMessage = (e) => {
 </script>
 
 <template>
-  <q-layout view="hHh LpR lFr" style="background-color: #242424">
-    <q-header class="bg-dark text-white">
+  <q-layout view="hHh LpR lFr">
+    <FireFly />
+    <q-header
+      class="bg-dark text-white"
+      :reveal-offset="50"
+      reveal
+      @reveal="headerHide($event)"
+    >
       <q-toolbar>
-        <q-avatar class="btn" @click="reload('article')">
+        <q-avatar class="btn" @click="reload()">
           <img src="../src/assets/avocado.svg" />
         </q-avatar>
 
@@ -66,7 +84,7 @@ const showErrorMessage = (e) => {
           v-show="!hideTitle"
           class="q-pl-none"
           style="max-width: 170px; min-width: 170px"
-          ><span class="btn q-pl-xs" @click="reload('/')"
+          ><span class="btn q-pl-xs" @click="reload()"
             >果凍的技術筆記</span
           ></q-toolbar-title
         >
@@ -127,7 +145,9 @@ const showErrorMessage = (e) => {
         </q-list>
       </q-scroll-area>
     </q-drawer>
-    <q-page-container><router-view /></q-page-container>
+    <q-page-container
+      ><router-view :width="width" :height="height" :header="headerNotHide"
+    /></q-page-container>
   </q-layout>
   <q-dialog v-model="errDialog" seamless position="bottom">
     <q-card>
