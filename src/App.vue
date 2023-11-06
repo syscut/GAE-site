@@ -35,6 +35,9 @@ onMounted(() => {
 window.addEventListener("resize", (e) => {
   width.value = window.innerWidth;
   height.value = window.innerHeight;
+  if (width.value > breakSize.value) {
+    leftDrawerOpen.value = false;
+  }
 });
 //computed---------------------
 const lessThanBreakPoint = computed(() => {
@@ -146,7 +149,11 @@ const showErrorMessage = (e) => {
       </q-scroll-area>
     </q-drawer>
     <q-page-container
-      ><router-view :width="width" :height="height" :header="headerNotHide"
+      ><router-view
+        :width="width"
+        :height="height"
+        :header="headerNotHide"
+        @errMsg="showErrorMessage($event)"
     /></q-page-container>
   </q-layout>
   <q-dialog v-model="errDialog" seamless position="bottom">

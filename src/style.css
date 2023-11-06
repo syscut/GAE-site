@@ -9,6 +9,10 @@
   -moz-osx-font-smoothing: grayscale;
   -webkit-text-size-adjust: 100%;
 }
+html,
+body {
+  height: 100%;
+}
 body {
   font-family: "微軟正黑體" !important;
 }
