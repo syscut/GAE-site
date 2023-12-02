@@ -1,4 +1,5 @@
-// Quantity should be the same in PUG
+@use "sass:math"
+
 $quantity: 25
 
 body
@@ -34,7 +35,6 @@ body
     box-shadow: 0 0 0vw 0vw yellow
     animation: drift ease alternate infinite, flash ease infinite
 
-  
 // Randomize Fireflies Motion
 @for $i from 1 through $quantity
   
@@ -53,8 +53,8 @@ body
 
   @keyframes move#{$i}
     @for $step from 0 through $steps
-      #{$step * (100 / $steps)}%
-        transform: translateX(random(100) - 50vw) translateY(random(100) - 50vh) scale(random(75) / 100 + .25)
+      #{$step * math.div(100 , $steps)}%
+        transform: translateX(random(100) - 50vw) translateY(random(100) - 50vh) scale(math.div(random(75) , 100) + .25)
 
 @keyframes drift
   0%
