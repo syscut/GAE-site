@@ -1,7 +1,6 @@
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import axios from "axios";
-import CodeShare from "./CodeShare.vue";
 const $props = defineProps({
   width: {
     type: Number,
@@ -15,6 +14,10 @@ const $props = defineProps({
     type: Boolean,
     default: true,
   },
+});
+onMounted(() => {
+  hljs.highlightAll();
+  // hljs.initLineNumbersOnLoad();
 });
 const article = ref({
   id: 1,
@@ -55,7 +58,7 @@ const code = `const $props = defineProps({
           <div class="text-h3">
             {{ article.title }} width : {{ width }}, height : {{ height }}
           </div>
-          <CodeShare :code="code" file-name="c.js"></CodeShare>
+          <pre><code>{{ code }}</code></pre>
         </q-card-section>
       </q-card>
     </div>

@@ -106,4 +106,10 @@
   /* -- Overrides the default colors used by the ckeditor5-link package. ---------------------- */
 
   --ck-color-link-default: hsl(190, 100%, 75%);
+
+  /* -- */
+  --ck-style-panel-button-label-background: transparent;
+}
+div.ck-style-grid__button__preview {
+  display: block;
 }

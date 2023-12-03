@@ -1,13 +1,49 @@
 <script setup>
-import { h, onMounted, ref, reactive, computed } from "vue";
+import { onMounted, ref, reactive, computed, nextTick } from "vue";
 import { Quasar } from "quasar";
-import CodeShare from "./CodeShare.vue";
 import "../../src/assets/ckeditor.js";
 let editorInstance = reactive({});
 const editorData = ref("");
-const c = h("highlightjs", { code: 'const a = "";' });
+const tmpCode = ref("");
+const test = () => {
+  hljs.initLineNumbersOnLoad();
+};
+const con = async () => {
+  tmpCode.value =
+    "<pre><code>" + window.getSelection().toString() + "</code></pre>";
+  await nextTick();
+  hljs.highlightAll();
 
+  editorInstance.setData(document.getElementById("highlightedCode").innerHTML);
+  //   editorInstance.setData(`<pre><code>const $props = defineProps({
+  //   width: {
+  //     type: Number,
+  //     default: 0,
+  //   },
+  //   height: {
+  //     type: Number,
+  //     default: 0,
+  //   },
+  //   header: {
+  //     type: Boolean,
+  //     default: true,
+  //   },
+  // });</code></pre>`);
+
+  // document.querySelectorAll("pre code").forEach((el) => {
+  //   hljs.highlightElement(el);
+  // });
+
+  // hljs.initLineNumbersOnLoad();
+  // document.querySelectorAll("p.code").forEach((el) => {
+  //   // console.log(el);
+  //   if (el.getAttribute("data-highlighted") !== "yes") {
+  //     hljs.highlightElement(el);
+  //   }
+  // });
+};
 onMounted(() => {
+  hljs.highlightAll();
   ClassicEditor.create(document.querySelector(".editor"), {
     toolbar: {
       items: [
@@ -23,7 +59,7 @@ onMounted(() => {
         "horizontalLine",
         "removeFormat",
         "|",
-        "htmlEmbed",
+        "selectAll",
         "alignment",
         "numberedList",
         "bulletedList",
@@ -70,24 +106,16 @@ onMounted(() => {
         },
       ],
     },
-    htmlEmbed: {
-      showPreviews: true,
-      sanitizeHtml: (inputHtml) => {
-        // Strip unsafe elements and attributes, e.g.:
-        // the `<script>` elements and `on*` attributes.
-        console.log(inputHtml);
-        return {
-          html: inputHtml,
-          // true or false depending on whether the sanitizer stripped anything.
-          hasChanged: true,
-        };
-      },
-    },
   })
     .then((editor) => {
       // show all avalible plugins
       // console.log(Array.from(editor.ui.componentFactory.names()));
       editorInstance = editor;
+      document.querySelectorAll("button").forEach((el) => {
+        if (el.textContent == "Code") {
+          el.addEventListener("click", con, false);
+        }
+      });
     })
     .catch((e) => {
       console.error(e);
@@ -95,22 +123,29 @@ onMounted(() => {
 });
 // const c = computed(() => {
 // });
-const d = `<highlightjs code="const a = '';"></highlightjs>`;
+const code = `const $props = defineProps({
+  width: {
+    type: Number,
+    default: 0,
+  },
+  height: {
+    type: Number,
+    default: 0,
+  },
+  header: {
+    type: Boolean,
+    default: true,
+  },
+});`;
 </script>
 <template>
-  <component :is="c" />
+  <div id="highlightedCode" v-html="tmpCode"></div>
   <q-btn label="test" @click="test()"></q-btn>
   <div style="color: aliceblue">{{ editorData }}</div>
   <div class="editor"></div>
 </template>
 <style scoped>
-.ck.ck-content h3.category {
-  font-family: "Bebas Neue";
-  font-size: 20px;
-  font-weight: bold;
-  color: #d1d1d1;
-  letter-spacing: 10px;
-  margin: 0;
-  padding: 0;
+button.custom-button:hover {
+  background-color: red !important;
 }
 </style>
