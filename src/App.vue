@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import FireFly from "./components/FireFly.vue";
+import FireFly from "./components/firefly.vue";
 import axios from "axios";
 import router from "./router.js";
 import { Quasar } from "quasar";
@@ -80,7 +80,7 @@ const showErrorMessage = (e) => {
     >
       <q-toolbar>
         <q-avatar class="btn" @click="reload()">
-          <img src="../src/assets/avocado.svg" />
+          <img src="../src/assets/svg/avocado.svg" />
         </q-avatar>
 
         <q-toolbar-title

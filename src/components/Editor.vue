@@ -1,54 +1,20 @@
 <script setup>
 import { onMounted, ref, reactive, computed, nextTick } from "vue";
 import { Quasar } from "quasar";
-import "../../src/assets/ckeditor.js";
+import "../../src/assets/ckeditor/ckeditor.js";
+const $props = defineProps({
+  shouldNotGroupWhenFull: {
+    type: Boolean,
+    default: true,
+  },
+});
+const $emit = defineEmits(["errMsg"]);
 let editorInstance = reactive({});
-const editorData = ref("");
-const tmpCode = ref("");
-const test = () => {
-  hljs.initLineNumbersOnLoad();
-};
-const con = async () => {
-  tmpCode.value =
-    "<pre><code>" + window.getSelection().toString() + "</code></pre>";
-  await nextTick();
-  hljs.highlightAll();
-
-  editorInstance.setData(document.getElementById("highlightedCode").innerHTML);
-  //   editorInstance.setData(`<pre><code>const $props = defineProps({
-  //   width: {
-  //     type: Number,
-  //     default: 0,
-  //   },
-  //   height: {
-  //     type: Number,
-  //     default: 0,
-  //   },
-  //   header: {
-  //     type: Boolean,
-  //     default: true,
-  //   },
-  // });</code></pre>`);
-
-  // document.querySelectorAll("pre code").forEach((el) => {
-  //   hljs.highlightElement(el);
-  // });
-
-  // hljs.initLineNumbersOnLoad();
-  // document.querySelectorAll("p.code").forEach((el) => {
-  //   // console.log(el);
-  //   if (el.getAttribute("data-highlighted") !== "yes") {
-  //     hljs.highlightElement(el);
-  //   }
-  // });
-};
 onMounted(() => {
-  hljs.highlightAll();
   ClassicEditor.create(document.querySelector(".editor"), {
     toolbar: {
       items: [
-        "heading",
-        "|",
+        "selectAll",
         "fontSize",
         "fontColor",
         "highlight",
@@ -58,8 +24,9 @@ onMounted(() => {
         "strikethrough",
         "horizontalLine",
         "removeFormat",
+        "htmlEmbed",
         "|",
-        "selectAll",
+        "heading",
         "alignment",
         "numberedList",
         "bulletedList",
@@ -94,7 +61,7 @@ onMounted(() => {
         "undo",
         "redo",
       ],
-      shouldNotGroupWhenFull: true,
+      shouldNotGroupWhenFull: $props.shouldNotGroupWhenFull,
     },
     htmlSupport: {
       allow: [
@@ -113,7 +80,10 @@ onMounted(() => {
       editorInstance = editor;
       document.querySelectorAll("button").forEach((el) => {
         if (el.textContent == "Code") {
-          el.addEventListener("click", con, false);
+          el.addEventListener("click", highlightSection, false);
+        }
+        if (el.textContent == "File Upload") {
+          el.addEventListener("click", upload, false);
         }
       });
     })
@@ -121,9 +91,14 @@ onMounted(() => {
       console.error(e);
     });
 });
+const tmpCode = ref("");
+const uploadDialog = ref(false);
 // const c = computed(() => {
 // });
-const code = `const $props = defineProps({
+const test = () => {
+  editorInstance.setData(`<p>測試測試測試測試測試測試測試測試</p><p>
+測試測試測試測試測試測</p>
+<pre>const $props = defineProps({
   width: {
     type: Number,
     default: 0,
@@ -136,16 +111,59 @@ const code = `const $props = defineProps({
     type: Boolean,
     default: true,
   },
-});`;
+});</pre>
+<p>測試測試測試測試</p>
+  <p>測試測試測試測試測試測試測試測試</p>`);
+  // hljs.initLineNumbersOnLoad();
+};
+const highlightSection = async () => {
+  const range = editorInstance.model.document.selection.getFirstRange();
+  let selectedText = "";
+  for (const item of range.getItems()) {
+    selectedText += item.data;
+  }
+  if (selectedText !== "") {
+    tmpCode.value = "<pre><code>" + selectedText + "</code></pre>";
+    await nextTick();
+    hljs.highlightAll();
+    const lighted = document.getElementById("highlightedCode").innerHTML;
+    const replace = "Replace_section-" + Math.random().toString(16).slice(2);
+    editorInstance.model.change((writer) => {
+      editorInstance.model.insertContent(writer.createText(replace), range);
+    });
+    editorInstance.setData(editorInstance.getData().replace(replace, lighted));
+    editorInstance.editing.view.focus();
+  } else {
+    $emit("errMsg", "沒有任何選擇文字");
+    editorInstance.editing.view.focus();
+  }
+};
+const upload = async () => {
+  uploadDialog.value = true;
+  editorInstance.editing.view.focus();
+};
 </script>
 <template>
-  <div id="highlightedCode" v-html="tmpCode"></div>
-  <q-btn label="test" @click="test()"></q-btn>
-  <div style="color: aliceblue">{{ editorData }}</div>
+  <q-btn label="add test data" @click="test()"></q-btn>
   <div class="editor"></div>
+  <q-dialog v-model="uploadDialog">
+    <q-card>
+      <q-card-section class="row items-center q-pb-none">
+        <div class="text-h6">Close icon</div>
+        <q-space />
+        <q-btn icon="close" flat round dense v-close-popup />
+      </q-card-section>
+
+      <q-card-section>
+        <q-uploader
+          url="http://localhost:4444/upload"
+          label="Individual upload"
+          multiple
+          style="max-width: 300px"
+        />
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+  <div id="highlightedCode" v-html="tmpCode" style="display: none"></div>
 </template>
-<style scoped>
-button.custom-button:hover {
-  background-color: red !important;
-}
-</style>
+<style scoped></style>

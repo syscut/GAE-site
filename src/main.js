@@ -6,8 +6,8 @@ import router from "./router.js";
 import axios from "axios";
 // ---css
 import "./style.css";
-import "./assets/ckeditor-darktheme.css";
-import "./assets/highlight/styles/tokyo-night-dark.css";
+import "./assets/ckeditor/ckeditor-darktheme.css";
+import "./assets/highlight/styles/tokyo-night-dark.min.css";
 import "@quasar/extras/material-icons/material-icons.css";
 import "@quasar/extras/material-icons-outlined/material-icons-outlined.css";
 import "quasar/src/css/index.sass";

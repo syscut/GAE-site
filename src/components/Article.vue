@@ -39,6 +39,9 @@ const code = `const $props = defineProps({
     default: true,
   },
 });`;
+const img = ref(`<figure class="image">
+    <img style="aspect-ratio:112/112;" src="https://miro.medium.com/v2/resize:fill:112:112/1*Zuc0xNu0hB05ppjP3aPinQ.png" width="112" height="112">
+</figure>`);
 // const code = (
 //   await axios
 //     .get(
@@ -58,6 +61,7 @@ const code = `const $props = defineProps({
           <div class="text-h3">
             {{ article.title }} width : {{ width }}, height : {{ height }}
           </div>
+          <div v-html="img"></div>
           <pre><code>{{ code }}</code></pre>
         </q-card-section>
       </q-card>
