@@ -3,18 +3,31 @@ import { onMounted, ref, reactive, computed, nextTick } from "vue";
 import { Quasar } from "quasar";
 import "../../src/assets/ckeditor/ckeditor.js";
 const $props = defineProps({
+  header: {
+    type: Boolean,
+    default: false,
+  },
   shouldNotGroupWhenFull: {
     type: Boolean,
     default: true,
   },
 });
 const $emit = defineEmits(["errMsg"]);
+const topPx = computed(() => {
+  const toolBar = document.querySelector("div.ck-editor__top");
+  if (toolBar !== null) {
+    toolBar.style.top = $props.header ? "50px" : "0px";
+  }
+  return $props.header;
+});
 let editorInstance = reactive({});
 onMounted(() => {
   ClassicEditor.create(document.querySelector(".editor"), {
     toolbar: {
+      // selectAll -> Code; htmlEmbed -> upload;
       items: [
         "selectAll",
+        "htmlEmbed",
         "fontSize",
         "fontColor",
         "highlight",
@@ -24,7 +37,7 @@ onMounted(() => {
         "strikethrough",
         "horizontalLine",
         "removeFormat",
-        "htmlEmbed",
+        "sourceEditing",
         "|",
         "heading",
         "alignment",
@@ -33,7 +46,6 @@ onMounted(() => {
         "insertTable",
         "blockQuote",
         "link",
-        "sourceEditing",
         {
           label: "image",
           icon: '<svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-4.86 8.86l-3 3.87L9 13.14 6 17h12l-3.86-5.14z"/></svg>',
@@ -86,9 +98,25 @@ onMounted(() => {
           el.addEventListener("click", upload, false);
         }
       });
+      let saveBtn = document.createElement("button");
+      saveBtn.classList.add("ck", "ck-button", "ck-off");
+      saveBtn.type = "button";
+      saveBtn.style["font-family"] = "微軟正黑體";
+      saveBtn.textContent = "暫存";
+      saveBtn.addEventListener("click", save, false);
+      document.querySelector("div.ck-toolbar__items").appendChild(saveBtn);
+      let newArticleBtn = document.createElement("button");
+      newArticleBtn.classList.add("ck", "ck-button", "ck-off");
+      newArticleBtn.type = "button";
+      newArticleBtn.style["font-family"] = "微軟正黑體";
+      newArticleBtn.textContent = "發文";
+      newArticleBtn.addEventListener("click", newArticle, false);
+      document
+        .querySelector("div.ck-toolbar__items")
+        .appendChild(newArticleBtn);
     })
     .catch((e) => {
-      console.error(e);
+      $emit("errMsg", e);
     });
 });
 const tmpCode = ref("");
@@ -96,7 +124,8 @@ const uploadDialog = ref(false);
 // const c = computed(() => {
 // });
 const test = () => {
-  editorInstance.setData(`<p>測試測試測試測試測試測試測試測試</p><p>
+  editorInstance.setData(`<p>測試測試測試測試測試測試測試測試</p>
+  <p>測試測試測試測試測試測試測試測試</p><p><p>測試測試測試測試測試測試測試測試</p>
 測試測試測試測試測試測</p>
 <pre>const $props = defineProps({
   width: {
@@ -112,17 +141,31 @@ const test = () => {
     default: true,
   },
 });</pre>
-<p>測試測試測試測試</p>
-  <p>測試測試測試測試測試測試測試測試</p>`);
+<p>測試測試測試測試測試測試測試測試</p><p>測試測試測試測試測試測試測試測試</p>
+<p>測試測試測試測試</p><p>測試測試測試測試測試測試測試測試</p>
+  <p>測試測試測試測試測試測試測試測試</p><p>測試測試測試測試測試測試測試測試</p>`);
   // hljs.initLineNumbersOnLoad();
 };
 const highlightSection = async () => {
   const range = editorInstance.model.document.selection.getFirstRange();
   let selectedText = "";
+  let t = "";
   for (const item of range.getItems()) {
-    selectedText += item.data;
+    if (item.name === "softBreak") {
+      selectedText = selectedText.concat("\n");
+    }
+    if (item.data) {
+      t = t.concat(item.data);
+      selectedText = selectedText.concat(
+        item.data.replace("<", "&lt;").replace(">", "&gt;")
+      );
+    }
   }
   if (selectedText !== "") {
+    let addSpace = "";
+    if (document.querySelector("div.ck-editor__main").textContent.endsWith(t)) {
+      addSpace = addSpace.concat("<p></p>");
+    }
     tmpCode.value = "<pre><code>" + selectedText + "</code></pre>";
     await nextTick();
     hljs.highlightAll();
@@ -130,9 +173,10 @@ const highlightSection = async () => {
     const replace = "Replace_section-" + Math.random().toString(16).slice(2);
     editorInstance.model.change((writer) => {
       editorInstance.model.insertContent(writer.createText(replace), range);
+      let highlighted = editorInstance.getData().replace(replace, lighted);
+      editorInstance.setData(highlighted + addSpace);
     });
-    editorInstance.setData(editorInstance.getData().replace(replace, lighted));
-    editorInstance.editing.view.focus();
+    // editorInstance.editing.view.focus();
   } else {
     $emit("errMsg", "沒有任何選擇文字");
     editorInstance.editing.view.focus();
@@ -142,8 +186,18 @@ const upload = async () => {
   uploadDialog.value = true;
   editorInstance.editing.view.focus();
 };
+const save = () => {
+  editorInstance.editing.view.focus();
+  console.log(editorInstance.getData());
+};
+const newArticle = () => {
+  editorInstance.editing.view.focus();
+  console.log("發文");
+};
 </script>
 <template>
+  <div id="highlightedCode" v-html="tmpCode" style="display: none"></div>
+  <div style="display: none">{{ topPx }}</div>
   <q-btn label="add test data" @click="test()"></q-btn>
   <div class="editor"></div>
   <q-dialog v-model="uploadDialog">
@@ -164,6 +218,5 @@ const upload = async () => {
       </q-card-section>
     </q-card>
   </q-dialog>
-  <div id="highlightedCode" v-html="tmpCode" style="display: none"></div>
 </template>
 <style scoped></style>

@@ -27,6 +27,7 @@ const emitErrMsg = (msg) => {
           <div class="text-h3">新增文章</div>
           <Editor
             :should-not-group-when-full="$props.width > 1000"
+            :header="$props.header"
             @errMsg="emitErrMsg($event)"
           />
         </q-card-section>

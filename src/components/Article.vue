@@ -39,9 +39,13 @@ const code = `const $props = defineProps({
     default: true,
   },
 });`;
-const img = ref(`<figure class="image">
-    <img style="aspect-ratio:112/112;" src="https://miro.medium.com/v2/resize:fill:112:112/1*Zuc0xNu0hB05ppjP3aPinQ.png" width="112" height="112">
-</figure>`);
+const img = ref(
+  `<p style="text-align:center;">
+    <iframe width="${$props.width - 80}" height="${
+    (($props.width - 80) * 315) / 560
+  }" src="https://www.youtube.com/embed/94isQCmyLsw?si=ms8-pIUOtwsuCTL1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+</p>`
+);
 // const code = (
 //   await axios
 //     .get(
@@ -55,7 +59,7 @@ const img = ref(`<figure class="image">
 </script>
 <template>
   <div class="row justify-around">
-    <div class="col-8">
+    <div class="col-xs-12 col-sm-10 col-md-8">
       <q-card class="article-background" dark flat square>
         <q-card-section>
           <div class="text-h3">
