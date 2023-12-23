@@ -39,13 +39,6 @@ const code = `const $props = defineProps({
     default: true,
   },
 });`;
-const img = ref(
-  `<p style="text-align:center;">
-    <iframe width="${$props.width - 80}" height="${
-    (($props.width - 80) * 315) / 560
-  }" src="https://www.youtube.com/embed/94isQCmyLsw?si=ms8-pIUOtwsuCTL1" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
-</p>`
-);
 // const code = (
 //   await axios
 //     .get(
@@ -65,16 +58,10 @@ const img = ref(
           <div class="text-h3">
             {{ article.title }} width : {{ width }}, height : {{ height }}
           </div>
-          <div v-html="img"></div>
           <pre><code>{{ code }}</code></pre>
         </q-card-section>
       </q-card>
     </div>
   </div>
 </template>
-<style scoped>
-.article-background {
-  background-color: transparent;
-  backdrop-filter: blur(8px);
-}
-</style>
+<style scoped></style>

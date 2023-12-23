@@ -27,6 +27,7 @@ app.config.globalProperties.$globalVar = {
   param1: "",
   param2: "",
   param3: "",
+  analyseText: "",
 };
 app.use(Quasar, {
   plugins: { LoadingBar },

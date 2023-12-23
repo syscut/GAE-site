@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
-import FireFly from "./components/firefly.vue";
+import FireFly from "./components/Firefly.vue";
 import axios from "axios";
 import router from "./router.js";
 import { Quasar } from "quasar";
@@ -15,11 +15,12 @@ const errDialog = ref(false);
 const searchText = ref("");
 const errMessage = ref("");
 const menuItems = ref([
-  { id: 0, name: "翻譯功能", icon: "translate" },
-  { id: 1, name: "文章分類", icon: "article" },
-  { id: 2, name: "關於我", icon: "person" },
+  { id: 0, name: "翻譯功能", icon: "translate", to: "translate" },
+  { id: 1, name: "文章分類", icon: "article", to: "articleGroup" },
+  { id: 2, name: "關於我", icon: "person", to: "aboutMe" },
   { id: 3, name: "separator", icon: "none" },
-  { id: 4, name: "登入", icon: "login" },
+  { id: 4, name: "新增文章", icon: "post_add", to: "newArticle" },
+  { id: 5, name: "登入", icon: "login", to: "login" },
 ]);
 //setting---------------------
 onMounted(() => {
@@ -47,8 +48,11 @@ const hideTitle = computed(() => {
   return width.value < 450;
 });
 //function--------------------
-const reload = (p) => {
+const reload = () => {
   router.push("/");
+};
+const routerTo = (to) => {
+  router.push(to);
 };
 const headerHide = (notHide) => {
   headerNotHide.value = notHide;
@@ -111,6 +115,7 @@ const showErrorMessage = (e) => {
         </div>
         <div v-for="menu in menuItems" :key="menu.id">
           <q-btn
+            :to="menu.to"
             flat
             rounded
             v-show="!lessThanBreakPoint && menu.name != 'separator'"
@@ -138,7 +143,12 @@ const showErrorMessage = (e) => {
     >
       <q-scroll-area class="fit">
         <q-list v-for="menu in menuItems" :key="menu.id">
-          <q-item v-if="menu.name != 'separator'" clickable v-ripple>
+          <q-item
+            v-if="menu.name != 'separator'"
+            clickable
+            v-ripple
+            @click="routerTo(menu.to)"
+          >
             <q-item-section avatar>
               <q-icon :name="menu.icon" />
             </q-item-section>
