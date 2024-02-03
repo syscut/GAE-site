@@ -3,11 +3,12 @@ import { ref, computed, onMounted } from "vue";
 import FireFly from "./components/Firefly.vue";
 import axios from "axios";
 import router from "./router.js";
-import { Quasar } from "quasar";
+import { Quasar, useQuasar } from "quasar";
 //variables---------------------
 const test = ref("aaaa");
 const breakSize = ref(800);
 const leftDrawerOpen = ref(false);
+const $q = useQuasar();
 const width = ref(window.innerWidth);
 const height = ref(window.innerHeight - 50);
 const headerNotHide = ref(true);
@@ -19,19 +20,19 @@ const menuItems = ref([
   { id: 1, name: "文章分類", icon: "article", to: "articleGroup" },
   { id: 2, name: "關於我", icon: "person", to: "aboutMe" },
   { id: 3, name: "separator", icon: "none" },
-  { id: 4, name: "新增文章", icon: "post_add", to: "newArticle" },
+  { id: 4, name: "新增文章", icon: "post_add", to: "newArticle", ajax: true },
   { id: 5, name: "登入", icon: "login", to: "login" },
 ]);
 //setting---------------------
 onMounted(() => {
-  // axios
-  //   .get("today")
-  //   .then((r) => {
-  //     console.log(r.data);
-  //   })
-  //   .catch((e) => {
-  //     showErrorMessage(e);
-  //   });
+  axios
+    .get("test")
+    .then((r) => {
+      console.log(r.data);
+    })
+    .catch((e) => {
+      showErrorMessage(e);
+    });
 });
 window.addEventListener("resize", (e) => {
   width.value = window.innerWidth;
@@ -52,7 +53,15 @@ const reload = () => {
   router.push("/");
 };
 const routerTo = (to) => {
+  if (to == "newArticle") {
+    triggerLoadingBar();
+  }
   router.push(to);
+};
+const triggerLoadingBar = () => {
+  console.log("loading...");
+  $q.loadingBar.start();
+  $q.loadingBar.increment(0.5);
 };
 const headerHide = (notHide) => {
   headerNotHide.value = notHide;
@@ -116,6 +125,7 @@ const showErrorMessage = (e) => {
         <div v-for="menu in menuItems" :key="menu.id">
           <q-btn
             :to="menu.to"
+            @click="menu.ajax ? triggerLoadingBar() : ''"
             flat
             rounded
             v-show="!lessThanBreakPoint && menu.name != 'separator'"

@@ -17,7 +17,7 @@ const $props = defineProps({
 });
 onMounted(() => {
   hljs.highlightAll();
-  // hljs.initLineNumbersOnLoad();
+  hljs.initLineNumbersOnLoad();
 });
 const article = ref({
   id: 1,

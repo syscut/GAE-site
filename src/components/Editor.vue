@@ -1,6 +1,6 @@
 <script setup>
 import { onMounted, ref, reactive, computed, nextTick } from "vue";
-import { Quasar } from "quasar";
+import { Quasar, useQuasar } from "quasar";
 import "../../src/assets/ckeditor/ckeditor.js";
 const $props = defineProps({
   header: {
@@ -21,6 +21,7 @@ const topPx = computed(() => {
   return $props.header;
 });
 let editorInstance = reactive({});
+const $q = useQuasar();
 onMounted(() => {
   ClassicEditor.create(document.querySelector(".editor"), {
     toolbar: {
@@ -87,6 +88,7 @@ onMounted(() => {
     },
   })
     .then((editor) => {
+      $q.loadingBar.increment(0.7);
       // show all avalible plugins
       // console.log(Array.from(editor.ui.componentFactory.names()));
       editorInstance = editor;
@@ -114,15 +116,19 @@ onMounted(() => {
       document
         .querySelector("div.ck-toolbar__items")
         .appendChild(newArticleBtn);
+      $q.loadingBar.stop();
+      console.log("done");
     })
     .catch((e) => {
       $emit("errMsg", e);
+      $q.loadingBar.stop();
     });
 });
 const tmpCode = ref("");
 const uploadDialog = ref(false);
 // const c = computed(() => {
 // });
+
 const test = () => {
   editorInstance.setData(`<p>測試測試測試測試測試測試測試測試</p>
   <p>測試測試測試測試測試測試測試測試</p><p><p>測試測試測試測試測試測試測試測試</p>
