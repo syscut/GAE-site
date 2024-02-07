@@ -12,7 +12,10 @@ import "@quasar/extras/material-icons/material-icons.css";
 import "@quasar/extras/material-icons-outlined/material-icons-outlined.css";
 import "quasar/src/css/index.sass";
 
-axios.defaults.baseURL = "https://syscut-b.de.r.appspot.com/";
+axios.defaults.baseURL = import.meta.env.PROD
+  ? "https://syscut-b.de.r.appspot.com/"
+  : "http://localhost:5000/";
+axios.defaults.withCredentials = true;
 const home = import.meta.env.PROD
   ? "https://syscut.com/"
   : "http://localhost:8080/";

@@ -26,7 +26,9 @@ const menuItems = ref([
 //setting---------------------
 onMounted(() => {
   axios
-    .get("test")
+    .get("test", {
+      withCredentials: true,
+    })
     .then((r) => {
       console.log(r.data);
     })
