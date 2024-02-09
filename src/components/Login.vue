@@ -33,7 +33,7 @@ const login = () => {
       console.log(e.data);
     })
     .catch((e) => {
-      console.log(e.response.data);
+      console.log(e?.response?.data);
     });
 };
 const article = () => {
