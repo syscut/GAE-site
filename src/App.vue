@@ -21,7 +21,7 @@ const menuItems = ref([
   { id: 2, name: "關於我", icon: "person", to: "aboutMe" },
   { id: 3, name: "separator", icon: "none" },
   { id: 4, name: "新增文章", icon: "post_add", to: "newArticle", ajax: true },
-  { id: 5, name: "登入", icon: "login", to: "login" },
+  { id: 5, name: "登入 / 註冊", icon: "login", to: "login" },
 ]);
 //setting---------------------
 onMounted(() => {
