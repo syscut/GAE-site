@@ -1,6 +1,6 @@
 <script setup>
 // source：https://github.com/AsmrProg-YT/Modern-Login
-import { ref } from "vue";
+import { nextTick, ref } from "vue";
 import axios from "axios";
 import CryptoJS from "crypto-js";
 const $props = defineProps({
@@ -23,7 +23,21 @@ const emitErrMsg = (msg) => {
 };
 const username = ref("");
 const password = ref("");
+const newPassword = ref("");
+const newPasswordAgain = ref("");
+const newEmail = ref("");
+const newBirthday = ref("2000-01-01");
+const newEducation = ref("留白");
+const educationOpt = ref([
+  "留白",
+  "研究所或以上",
+  "大學",
+  "高中",
+  "國中或以下",
+]);
 const isPwd = ref(true);
+const isPwdN = ref(true);
+const displayLoginForm = ref("");
 const login = () => {
   const key = CryptoJS.enc.Utf8.parse("aK7+UX24ttB=fTnA");
   const iv = CryptoJS.enc.Utf8.parse("d4ee=RaW1prQ1F+f");
@@ -53,35 +67,144 @@ const article = () => {
 };
 const append = (targrt = "") => {
   const container = document.getElementById("container");
-  targrt == "register"
-    ? container.classList.add("active")
-    : container.classList.remove("active");
+  if (targrt == "register") {
+    console.log("add");
+    container.classList.add("active");
+    displayLoginForm.value = "opacity: 0;";
+  } else {
+    console.log("reomve");
+    container.classList.remove("active");
+    displayLoginForm.value = "";
+  }
 };
 </script>
 <template>
-  <div class="row justify-around">
-    <div class="col-xs-12 col-sm-10 col-md-8">
+  <div class="row justify-around items-center background-img">
+    <div class="col-xs-12 col-sm-10 col-md-8 self-center">
       <div class="container" id="container">
         <div class="form-container sign-up">
           <form>
-            <h3>註冊</h3>
-            <input type="text" placeholder="Name" />
-            <input type="email" placeholder="Email" />
-            <input type="password" placeholder="Password" />
-            <button>Sign Up</button>
-          </form>
-        </div>
-        <div class="form-container sign-in">
-          <form>
-            <h3>登入</h3>
+            <h3 class="text-white" style="line-height: 0.125rem">註冊</h3>
             <div class="row">
               <div class="col-12 q-pb-sm">
-                <q-input rounded outlined v-model="username" label="帳號" />
+                <q-input
+                  dense
+                  rounded
+                  outlined
+                  color="grey-1"
+                  label-color="black"
+                  bg-color="grey-1"
+                  placeholder="帳號"
+                />
+              </div>
+              <div class="col-12 q-pb-sm">
+                <q-input
+                  dense
+                  rounded
+                  outlined
+                  color="grey-1"
+                  label-color="black"
+                  bg-color="grey-1"
+                  :type="isPwdN ? 'password' : 'text'"
+                  placeholder="密碼"
+                  v-model="newPassword"
+                >
+                  <template v-slot:append>
+                    <q-icon
+                      :name="isPwdN ? 'visibility_off' : 'visibility'"
+                      class="cursor-pointer"
+                      @click="isPwdN = !isPwdN"
+                    />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 q-pb-sm">
+                <q-input
+                  dense
+                  rounded
+                  outlined
+                  color="grey-1"
+                  label-color="black"
+                  bg-color="grey-1"
+                  :type="isPwdN ? 'password' : 'text'"
+                  placeholder="再打一次你的密碼"
+                  v-model="newPasswordAgain"
+                >
+                  <template v-slot:append>
+                    <q-icon
+                      :name="isPwdN ? 'visibility_off' : 'visibility'"
+                      class="cursor-pointer"
+                      @click="isPwdN = !isPwdN"
+                    />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col-12 q-pb-sm">
+                <q-input
+                  dense
+                  rounded
+                  outlined
+                  type="email"
+                  color="grey-1"
+                  label-color="black"
+                  bg-color="grey-1"
+                  placeholder="Email"
+                  v-model="newEmail"
+                />
+              </div>
+              <div class="col-12 q-pb-sm">
+                <q-input
+                  dense
+                  rounded
+                  outlined
+                  stack-label
+                  type="date"
+                  color="grey-1"
+                  label-color="black"
+                  bg-color="grey-1"
+                  label="生日"
+                  v-model="newBirthday"
+                />
+              </div>
+              <div class="col-12 q-pb-sm">
+                <q-select
+                  dense
+                  rounded
+                  outlined
+                  stack-label
+                  label-color="black"
+                  bg-color="grey-1"
+                  label="教育程度(可留白)"
+                  v-model="newEducation"
+                  :options="educationOpt"
+                />
+              </div>
+            </div>
+            <q-btn push padding="10px 40px" color="primary" label="註冊" />
+          </form>
+        </div>
+        <div class="form-container sign-in" :style="displayLoginForm">
+          <form>
+            <h3 class="text-white">登入</h3>
+            <div class="row">
+              <div class="col-12 q-pb-sm">
+                <q-input
+                  rounded
+                  outlined
+                  color="grey-1"
+                  label-color="black"
+                  bg-color="grey-1"
+                  v-model="username"
+                  label="帳號"
+                />
               </div>
               <div class="col-12">
                 <q-input
                   rounded
                   outlined
+                  color="grey-1"
+                  label-color="black"
+                  bg-color="grey-1"
                   v-model="password"
                   label="密碼"
                   :type="isPwd ? 'password' : 'text'"
@@ -97,23 +220,31 @@ const append = (targrt = "") => {
               </div>
             </div>
             <a href="#">忘記密碼？</a>
-            <q-btn push color="primary" label="登入" />
+            <q-btn push padding="10px 40px" color="primary" label="登入" />
           </form>
         </div>
         <div class="toggle-container">
           <div class="toggle">
             <div class="toggle-panel toggle-left">
-              <h3>Welcome Back!</h3>
-              <p>Enter your personal details to use all of site features</p>
-              <button id="login" @click="append('login')">Sign In</button>
+              <h4>已經有帳號？</h4>
+              <p>是在阿囉？<br />快去登入！</p>
+              <q-btn
+                padding="10px 40px"
+                push
+                color="primary"
+                label="去登入"
+                id="login"
+                @click="append('login')"
+              />
             </div>
             <div class="toggle-panel toggle-right">
               <h4>HELLO<br />歡迎你</h4>
               <p>還沒有帳號嗎？註冊一個吧，可以發文，以及使用翻譯功能唷。</p>
               <q-btn
+                padding="10px 40px"
                 push
                 color="primary"
-                label="註冊"
+                label="去註冊"
                 id="register"
                 @click="append('register')"
               />
@@ -126,7 +257,8 @@ const append = (targrt = "") => {
 </template>
 <style scoped>
 .container {
-  background-color: #fff;
+  background-color: transparent;
+  backdrop-filter: blur(4px);
   border-radius: 30px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
   position: relative;
@@ -142,39 +274,15 @@ const append = (targrt = "") => {
   letter-spacing: 0.3px;
   margin: 20px 0;
 }
-
-.container span {
-  font-size: 12px;
-}
-
 .container a {
-  color: #333;
-  font-size: 13px;
+  color: #ffffff;
+  font-size: 14px;
   text-decoration: none;
-  margin: 15px 0 10px;
+  margin: 20px 0 15px;
 }
-
-.container button {
-  background-color: #512da8;
-  color: #fff;
-  font-size: 12px;
-  padding: 10px 45px;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  font-weight: 600;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-.container button.hidden {
-  background-color: transparent;
-  border-color: #fff;
-}
-
 .container form {
-  background-color: #fff;
+  background-color: transparent;
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -182,42 +290,26 @@ const append = (targrt = "") => {
   padding: 0 20px;
   height: 100%;
 }
-
-.container input {
-  background-color: #eee;
-  border: none;
-  margin: 8px 0;
-  padding: 10px 15px;
-  font-size: 13px;
-  border-radius: 8px;
-  width: 100%;
-  outline: none;
-}
-
 .form-container {
   position: absolute;
   top: 0;
   height: 100%;
   transition: all 0.6s ease-in-out;
 }
-
 .sign-in {
   left: 0;
   width: 50%;
   z-index: 2;
 }
-
 .container.active .sign-in {
   transform: translateX(100%);
 }
-
 .sign-up {
   left: 0;
   width: 50%;
   opacity: 0;
   z-index: 1;
 }
-
 .container.active .sign-up {
   transform: translateX(100%);
   opacity: 1;
@@ -256,9 +348,8 @@ const append = (targrt = "") => {
 }
 
 .toggle {
-  background-color: #512da8;
   height: 100%;
-  background: linear-gradient(to right, #5c6bc0, #512da8);
+  background: linear-gradient(to right, #6572bb, #512da8);
   color: #fff;
   position: relative;
   left: -100%;
@@ -302,5 +393,12 @@ const append = (targrt = "") => {
 
 .container.active .toggle-right {
   transform: translateX(200%);
+}
+</style>
+<style scoped lang="scss">
+.background-img {
+  min-height: 100%;
+  background-image: url("../assets/pexels-felix-mittermeier-956999.jpg");
+  background-size: cover;
 }
 </style>

@@ -9,6 +9,7 @@ const test = ref("aaaa");
 const breakSize = ref(800);
 const leftDrawerOpen = ref(false);
 const $q = useQuasar();
+const isMobile = ref(false);
 const width = ref(window.innerWidth);
 const height = ref(window.innerHeight - 50);
 const headerNotHide = ref(true);
@@ -25,16 +26,20 @@ const menuItems = ref([
 ]);
 //setting---------------------
 onMounted(() => {
-  axios
-    .get("test", {
-      withCredentials: true,
-    })
-    .then((r) => {
-      console.log(r.data);
-    })
-    .catch((e) => {
-      showErrorMessage(e);
-    });
+  // axios
+  //   .get("test", {
+  //     withCredentials: true,
+  //   })
+  //   .then((r) => {
+  //     console.log(r.data);
+  //   })
+  //   .catch((e) => {
+  //     showErrorMessage(e);
+  //   });
+  isMobile.value =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      window.navigator.userAgent
+    );
 });
 window.addEventListener("resize", (e) => {
   width.value = window.innerWidth;
@@ -49,6 +54,9 @@ const lessThanBreakPoint = computed(() => {
 });
 const hideTitle = computed(() => {
   return width.value < 450;
+});
+const checkIsMobile = computed(() => {
+  return isMobile.value ? "height: 85vh;" : "height: 100vh;";
 });
 //function--------------------
 const reload = () => {
@@ -170,7 +178,7 @@ const showErrorMessage = (e) => {
         </q-list>
       </q-scroll-area>
     </q-drawer>
-    <q-page-container
+    <q-page-container :style="checkIsMobile"
       ><router-view
         :width="width"
         :height="height"
