@@ -1,11 +1,13 @@
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
 import FireFly from "./components/Firefly.vue";
 import axios from "axios";
 import router from "./router.js";
+import { useStore } from "vuex";
 import { Quasar, useQuasar } from "quasar";
 //variables---------------------
-const test = ref("aaaa");
+const store = useStore();
+const timer = ref(0);
 const breakSize = ref(800);
 const leftDrawerOpen = ref(false);
 const $q = useQuasar();
@@ -23,23 +25,22 @@ const menuItems = ref([
   { id: 3, name: "separator", icon: "none" },
   { id: 4, name: "新增文章", icon: "post_add", to: "newArticle", ajax: true },
   { id: 5, name: "登入 / 註冊", icon: "login", to: "login" },
+  { id: 6, name: "登出", icon: "logout" },
 ]);
 //setting---------------------
+onBeforeMount(() => {});
 onMounted(() => {
-  // axios
-  //   .get("test", {
-  //     withCredentials: true,
-  //   })
-  //   .then((r) => {
-  //     console.log(r.data);
-  //   })
-  //   .catch((e) => {
-  //     showErrorMessage(e);
-  //   });
+  // showLoading();
   isMobile.value =
     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
       window.navigator.userAgent
     );
+});
+onBeforeUnmount(() => {
+  if (timer !== void 0) {
+    clearTimeout(timer);
+    $q.loading.hide();
+  }
 });
 window.addEventListener("resize", (e) => {
   width.value = window.innerWidth;
@@ -49,16 +50,24 @@ window.addEventListener("resize", (e) => {
   }
 });
 //computed---------------------
+const isLogin = computed(() => {
+  return store.state.username != "";
+});
+const loadingUser = computed(() => {
+  return store.state.isLoading;
+});
 const lessThanBreakPoint = computed(() => {
   return width.value < breakSize.value;
 });
 const hideTitle = computed(() => {
   return width.value < 450;
 });
-const checkIsMobile = computed(() => {
-  return isMobile.value ? "height: 85vh;" : "height: 100vh;";
-});
 //function--------------------
+const showLoading = () => {
+  $q.loading.show({
+    message: "資料連線中...",
+  });
+};
 const reload = () => {
   router.push("/");
 };
@@ -68,8 +77,33 @@ const routerTo = (to) => {
   }
   router.push(to);
 };
+const logout = () => {
+  store.commit("removeUser");
+  document.cookie =
+    "syscutToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax;";
+  window.location.reload();
+};
+const headerButtonCtrl = (menu = { icon: "" }) => {
+  if (menu.icon == "login") {
+    return !lessThanBreakPoint.value && !isLogin.value && !loadingUser.value;
+  } else if (menu.icon == "logout") {
+    return !lessThanBreakPoint.value && isLogin.value && !loadingUser.value;
+  } else {
+    return !lessThanBreakPoint.value;
+  }
+};
+const drawerButtonCtrl = (menu = { icon: "", name: "" }) => {
+  if (menu.name != "separator") {
+    if (menu.icon == "login") {
+      return !isLogin.value;
+    } else if (menu.icon == "logout") {
+      return isLogin.value;
+    } else {
+      return true;
+    }
+  }
+};
 const triggerLoadingBar = () => {
-  console.log("loading...");
   $q.loadingBar.start();
   $q.loadingBar.increment(0.5);
 };
@@ -83,6 +117,7 @@ const search = () => {
   showErrorMessage(searchText.value);
 };
 const showErrorMessage = (e) => {
+  // $q.loading.hide();
   errDialog.value = true;
   errMessage.value =
     e?.response?.data?.message || e?.response?.data || e?.message || e;
@@ -116,21 +151,28 @@ const showErrorMessage = (e) => {
         >
         <q-space></q-space>
         <div class="q-pr-sm">
-          <q-input
-            dense
-            rounded
-            outlined
-            borderless
-            dark
-            color="black"
-            v-model="searchText"
-            placeholder="搜尋"
-            @keydown.enter="search()"
-          >
-            <template v-slot:append>
-              <q-icon name="search" class="cursor-pointer" @click="search()" />
-            </template>
-          </q-input>
+          <form action="">
+            <q-input
+              dense
+              rounded
+              outlined
+              borderless
+              dark
+              color="black"
+              v-model="searchText"
+              placeholder="搜尋"
+              type="search"
+              @keydown.enter="search()"
+            >
+              <template v-slot:append>
+                <q-icon
+                  name="search"
+                  class="cursor-pointer"
+                  @click="search()"
+                />
+              </template>
+            </q-input>
+          </form>
         </div>
         <div v-for="menu in menuItems" :key="menu.id">
           <q-btn
@@ -138,7 +180,15 @@ const showErrorMessage = (e) => {
             @click="menu.ajax ? triggerLoadingBar() : ''"
             flat
             rounded
-            v-show="!lessThanBreakPoint && menu.name != 'separator'"
+            v-show="headerButtonCtrl(menu) && menu.to !== undefined"
+            class="q-px-md"
+            >{{ menu.name }}</q-btn
+          >
+          <q-btn
+            @click="logout()"
+            flat
+            rounded
+            v-show="headerButtonCtrl(menu) && menu.icon == 'logout'"
             class="q-px-md"
             >{{ menu.name }}</q-btn
           >
@@ -164,10 +214,10 @@ const showErrorMessage = (e) => {
       <q-scroll-area class="fit">
         <q-list v-for="menu in menuItems" :key="menu.id">
           <q-item
-            v-if="menu.name != 'separator'"
+            v-if="drawerButtonCtrl(menu)"
             clickable
             v-ripple
-            @click="routerTo(menu.to)"
+            @click="menu.to === undefined ? logout() : routerTo(menu.to)"
           >
             <q-item-section avatar>
               <q-icon :name="menu.icon" />
@@ -178,7 +228,7 @@ const showErrorMessage = (e) => {
         </q-list>
       </q-scroll-area>
     </q-drawer>
-    <q-page-container :style="checkIsMobile"
+    <q-page-container
       ><router-view
         :width="width"
         :height="height"

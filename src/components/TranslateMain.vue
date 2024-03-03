@@ -1,6 +1,7 @@
 <script setup>
 import { ref, getCurrentInstance } from "vue";
 import router from "../router";
+import axios from "axios";
 const $props = defineProps({
   width: {
     type: Number,
@@ -39,6 +40,7 @@ const analyze = () => {
           <div>
             <span class="text-h4 q-mb-sm"> 翻譯Demo</span>
             <span class="stickyRow">
+              <div id="recordedAudio"></div>
               <q-btn
                 flat
                 dense

@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
-
+import store from "./store/store.js";
+import axios from "axios";
 const routes = [
   {
     path: "/",
@@ -33,12 +34,41 @@ const routes = [
     component: () => import("./components/AnalyzeRseult.vue"),
   },
 ];
+
+const setUser = (
+  u = {
+    username: "",
+    name: "",
+    email: "",
+    birthday: "",
+    education: "",
+    role: 5,
+  }
+) => {
+  store.commit("setUser", u);
+  // $q.loading.hide();
+};
+const setLoadingState = (state) => {
+  store.commit("setLoadingState", state);
+};
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 router.beforeEach(async (to, from, next) => {
-  if (to.meta.requireAuth) {
+  setLoadingState(true);
+  axios
+    .post("auth/c")
+    .then((d) => {
+      setUser(d.data);
+    })
+    .catch((e) => {
+      console.log(e);
+    })
+    .finally(() => {
+      setLoadingState(false);
+    });
+  if (to.meta.requireAuth && store.state.username == "") {
     next({ name: "login" });
   } else {
     next();

@@ -15,7 +15,8 @@
     "quasar": "^2.12.7",
     "vue": "^3.3.9",
     "vue-router": "^4.2.5",
-    "vue3-word-cloud": "^1.0.4"
+    "vue3-word-cloud": "^1.0.4",
+    "vuex": "^4.0.2"
   },
   "devDependencies": {
     "@quasar/vite-plugin": "^1.5.0",

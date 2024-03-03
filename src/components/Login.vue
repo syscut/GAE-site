@@ -1,6 +1,7 @@
 <script setup>
 // source：https://github.com/AsmrProg-YT/Modern-Login
-import { nextTick, ref } from "vue";
+import { nextTick, ref, onMounted } from "vue";
+import router from "../router";
 import axios from "axios";
 import CryptoJS from "crypto-js";
 const $props = defineProps({
@@ -21,8 +22,11 @@ const $emit = defineEmits(["errMsg"]);
 const emitErrMsg = (msg) => {
   $emit("errMsg", msg);
 };
+onMounted(() => {});
+// variables ------------------------------------------------------
 const username = ref("");
 const password = ref("");
+const newUsername = ref("");
 const newPassword = ref("");
 const newPasswordAgain = ref("");
 const newEmail = ref("");
@@ -38,41 +42,45 @@ const educationOpt = ref([
 const isPwd = ref(true);
 const isPwdN = ref(true);
 const displayLoginForm = ref("");
+const leftSize = ref("left: 60%;");
+const staticMsg = ref("");
+// methods ----------------------------------------------------------
 const login = () => {
   const key = CryptoJS.enc.Utf8.parse("aK7+UX24ttB=fTnA");
   const iv = CryptoJS.enc.Utf8.parse("d4ee=RaW1prQ1F+f");
-  const d = CryptoJS.AES.encrypt("123456", key, {
+  const encrypted = CryptoJS.AES.encrypt(password.value, key, {
     iv: iv,
     mode: CryptoJS.mode.CBC,
     padding: CryptoJS.pad.ZeroPadding,
   });
   axios
-    .post("do/signin", { username: "kim23362611", password: d.toString() })
+    .post("do/signin", {
+      username: username.value,
+      password: encrypted.toString(),
+    })
     .then((e) => {
-      console.log(e.data);
+      // router.push("/");
+      // router.go();
+      staticMsg.value = "";
     })
     .catch((e) => {
-      console.log(e?.response?.data);
-    });
-};
-const article = () => {
-  axios
-    .get("articles")
-    .then((e) => {
-      console.log(e.data);
-    })
-    .catch((e) => {
-      console.log(e.response.data);
+      let errorMsg = e?.response?.data?.ErrorMessage;
+      if (errorMsg == "Bad credentials") {
+        errorMsg = "帳號或密碼錯誤";
+        staticMsg.value = errorMsg;
+      }
+      // Bad credentials
+      emitErrMsg(errorMsg || "網路連線異常");
     });
 };
 const append = (targrt = "") => {
   const container = document.getElementById("container");
   if (targrt == "register") {
-    console.log("add");
+    leftSize.value = "left: 40%;";
     container.classList.add("active");
     displayLoginForm.value = "opacity: 0;";
   } else {
-    console.log("reomve");
+    leftSize.value = "left: 60%;";
     container.classList.remove("active");
     displayLoginForm.value = "";
   }
@@ -83,7 +91,7 @@ const append = (targrt = "") => {
     <div class="col-xs-12 col-sm-10 col-md-8 self-center">
       <div class="container" id="container">
         <div class="form-container sign-up">
-          <form>
+          <form action="">
             <h3 class="text-white" style="line-height: 0.125rem">註冊</h3>
             <div class="row">
               <div class="col-12 q-pb-sm">
@@ -95,6 +103,7 @@ const append = (targrt = "") => {
                   label-color="black"
                   bg-color="grey-1"
                   placeholder="帳號"
+                  v-model="newUsername"
                 />
               </div>
               <div class="col-12 q-pb-sm">
@@ -184,7 +193,7 @@ const append = (targrt = "") => {
           </form>
         </div>
         <div class="form-container sign-in" :style="displayLoginForm">
-          <form>
+          <form action="">
             <h3 class="text-white">登入</h3>
             <div class="row">
               <div class="col-12 q-pb-sm">
@@ -219,17 +228,26 @@ const append = (targrt = "") => {
                 </q-input>
               </div>
             </div>
+            <p :v-show="staticMsg != ''" class="staticMsgStyle">
+              {{ staticMsg }}
+            </p>
             <a href="#">忘記密碼？</a>
-            <q-btn push padding="10px 40px" color="primary" label="登入" />
+            <q-btn
+              push
+              padding="10px 40px"
+              color="primary"
+              label="登入"
+              @click="login()"
+            />
           </form>
         </div>
-        <div class="toggle-container">
+        <div class="toggle-container" :style="leftSize">
           <div class="toggle">
             <div class="toggle-panel toggle-left">
-              <h4>已經有帳號？</h4>
+              <p style="font-size: 23px">有帳號了？</p>
               <p>是在阿囉？<br />快去登入！</p>
               <q-btn
-                padding="10px 40px"
+                padding="10px 25px"
                 push
                 color="primary"
                 label="去登入"
@@ -241,7 +259,7 @@ const append = (targrt = "") => {
               <h4>HELLO<br />歡迎你</h4>
               <p>還沒有帳號嗎？註冊一個吧，可以發文，以及使用翻譯功能唷。</p>
               <q-btn
-                padding="10px 40px"
+                padding="10px 25px"
                 push
                 color="primary"
                 label="去註冊"
@@ -257,8 +275,8 @@ const append = (targrt = "") => {
 </template>
 <style scoped>
 .container {
-  background-color: transparent;
-  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(1px);
+  backdrop-filter: blur(2px);
   border-radius: 30px;
   box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
   position: relative;
@@ -281,13 +299,11 @@ const append = (targrt = "") => {
   margin: 20px 0 15px;
 }
 .container form {
-  background-color: transparent;
-  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 0 20px;
+  padding: 0 5px;
   height: 100%;
 }
 .form-container {
@@ -298,15 +314,15 @@ const append = (targrt = "") => {
 }
 .sign-in {
   left: 0;
-  width: 50%;
+  width: 60%;
   z-index: 2;
 }
 .container.active .sign-in {
   transform: translateX(100%);
 }
 .sign-up {
-  left: 0;
-  width: 50%;
+  left: -18%;
+  width: 59%;
   opacity: 0;
   z-index: 1;
 }
@@ -333,8 +349,7 @@ const append = (targrt = "") => {
 .toggle-container {
   position: absolute;
   top: 0;
-  left: 50%;
-  width: 50%;
+  width: 40%;
   height: 100%;
   overflow: hidden;
   transition: all 0.6s ease-in-out;
@@ -371,7 +386,7 @@ const append = (targrt = "") => {
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 0 30px;
+  padding: 0 10px;
   text-align: center;
   top: 0;
   transform: translateX(0);
@@ -394,11 +409,19 @@ const append = (targrt = "") => {
 .container.active .toggle-right {
   transform: translateX(200%);
 }
+.staticMsgStyle {
+  color: red;
+  margin-bottom: -5px !important;
+}
 </style>
 <style scoped lang="scss">
 .background-img {
-  min-height: 100%;
-  background-image: url("../assets/pexels-felix-mittermeier-956999.jpg");
+  min-width: 100%;
+  min-height: calc(100vh - 50px);
+  // position: fixed;
+  // bottom: -3%;
+  // overflow: auto;
+  background-image: url("../assets/signin-bg.webp");
   background-size: cover;
 }
 </style>
