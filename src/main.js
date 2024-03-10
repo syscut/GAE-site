@@ -22,7 +22,7 @@ const home = import.meta.env.PROD
   : "http://localhost:8080/";
 const app = createApp(App);
 app.config.globalProperties.$globalVar = {
-  analyseText: "",
+  home: home,
 };
 app.use(Quasar, {
   plugins: { LoadingBar, Loading },

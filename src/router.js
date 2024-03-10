@@ -9,15 +9,18 @@ const routes = [
   },
   {
     path: "/articleGroup",
+    name: "articleGroup",
     component: () => import("./components/ArticleGroup.vue"),
   },
   {
     path: "/newArticle",
+    name: "newArticle",
+    meta: { requireAuth: true },
     component: () => import("./components/NewArticle.vue"),
   },
   {
     path: "/aboutMe",
-    meta: { requireAuth: true },
+    name: "aboutMe",
     component: () => import("./components/AboutMe.vue"),
   },
   {
@@ -27,10 +30,14 @@ const routes = [
   },
   {
     path: "/translate",
+    name: "translate",
+    meta: { requireAuth: true },
     component: () => import("./components/TranslateMain.vue"),
   },
   {
     path: "/analyzeRseult",
+    name: "analyzeRseult",
+    meta: { requireAuth: true },
     component: () => import("./components/AnalyzeRseult.vue"),
   },
 ];
@@ -46,32 +53,56 @@ const setUser = (
   }
 ) => {
   store.commit("setUser", u);
-  // $q.loading.hide();
 };
+/**
+ * 讓註冊扭呈現讀取狀態
+ * @param {Boolean} state
+ */
 const setLoadingState = (state) => {
   store.commit("setLoadingState", state);
+};
+const setRedirectUrl = (url = "") => {
+  store.commit("setRedirectUrl", url);
+};
+const checkUser = async () => {
+  return await axios.post("auth/c");
 };
 const router = createRouter({
   history: createWebHistory(),
   routes,
 });
 router.beforeEach(async (to, from, next) => {
-  setLoadingState(true);
-  axios
-    .post("auth/c")
-    .then((d) => {
-      setUser(d.data);
-    })
-    .catch((e) => {
-      console.log(e);
-    })
-    .finally(() => {
-      setLoadingState(false);
-    });
-  if (to.meta.requireAuth && store.state.username == "") {
-    next({ name: "login" });
+  if (store.state.username == "") {
+    setLoadingState(true);
+    await checkUser()
+      .then((d) => {
+        setUser(d.data);
+        if (to.name == "login") {
+          next("/");
+        } else {
+          next();
+        }
+      })
+      .catch((e) => {
+        let errMessage =
+          e?.response?.data?.message || e?.response?.data || e?.message || e;
+        console.info(errMessage);
+        if (to.meta.requireAuth) {
+          setRedirectUrl(to.name);
+          next({ name: "login" });
+        } else {
+          next();
+        }
+      })
+      .finally(() => {
+        setLoadingState(false);
+      });
   } else {
-    next();
+    if (to.name == "login") {
+      next("/");
+    } else {
+      next();
+    }
   }
 });
 export default router;

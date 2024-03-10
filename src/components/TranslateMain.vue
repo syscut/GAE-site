@@ -1,7 +1,9 @@
 <script setup>
-import { ref, getCurrentInstance } from "vue";
+import { ref } from "vue";
 import router from "../router";
+import { useStore } from "vuex";
 import axios from "axios";
+const store = useStore();
 const $props = defineProps({
   width: {
     type: Number,
@@ -16,19 +18,33 @@ const $props = defineProps({
     default: true,
   },
 });
-const app = getCurrentInstance();
 const $emit = defineEmits(["errMsg"]);
 const emitErrMsg = (msg) => {
   $emit("errMsg", msg);
 };
 const text = ref("");
 const test = ref(
-  `Vue is a JavaScript framework for building user interfaces. 
-It builds on top of standard HTML, CSS, and JavaScript and provides a declarative and component-based programming model that helps you efficiently develop user interfaces, be they simple or complex.`
+  `A US military ship is sailing towards the Middle East, carrying equipment to build a temporary pier off the coast of Gaza, the army says.
+
+The support ship, General Frank S Besson, set sail from a military base in the state of Virginia on Saturday.
+
+    Why food airdrops into Gaza are controversial
+    Why are Israel and Hamas fighting in Gaza?
+
+The US ship departed "less than 36 hours" after Mr Biden made his announcement, US Central Command wrote on X.
+
+It is "carrying the first equipment to establish a temporary pier to deliver vital humanitarian supplies" to Gaza, the statement continued.
+
+The Pentagon has said it could take up to 60 days to build the pier with the help of 1,000 troops - none of whom would go ashore.
+
+Charities have said those suffering in Gaza cannot wait that long.
+
+Meanwhile, an aid ship laden with some 200 tonnes of food was still waiting for clearance to set sail from a port in Cyprus on Sunday morning.
+
+It is hoped the vessel, Open Arms, will be able to depart before Monday, following an EU announcement that a new sea route would be opened over the weekend to allow aid to sail directly from Cyprus - the closest EU country to Gaza.`
 );
 const analyze = () => {
-  app.appContext.config.globalProperties.analyseText = text;
-  //   console.log(app.appContext.config.globalProperties.analyseText.value);
+  store.state.translateText = text;
   router.push("/analyzeRseult");
 };
 </script>

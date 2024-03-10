@@ -1,5 +1,12 @@
 <script setup>
-import { ref, computed, onMounted, onBeforeUnmount, onBeforeMount } from "vue";
+import {
+  ref,
+  computed,
+  onMounted,
+  onBeforeUnmount,
+  onBeforeMount,
+  getCurrentInstance,
+} from "vue";
 import FireFly from "./components/Firefly.vue";
 import axios from "axios";
 import router from "./router.js";
@@ -7,6 +14,8 @@ import { useStore } from "vuex";
 import { Quasar, useQuasar } from "quasar";
 //variables---------------------
 const store = useStore();
+const app = getCurrentInstance();
+const home = app.appContext.config.globalProperties.$globalVar.home;
 const timer = ref(0);
 const breakSize = ref(800);
 const leftDrawerOpen = ref(false);
@@ -69,7 +78,11 @@ const showLoading = () => {
   });
 };
 const reload = () => {
-  router.push("/");
+  // router.push("/");
+  window.location.href = home;
+  // window.setTimeout(() => {
+  //   window.location.reload();
+  // }, 0);
 };
 const routerTo = (to) => {
   if (to == "newArticle") {
@@ -78,10 +91,18 @@ const routerTo = (to) => {
   router.push(to);
 };
 const logout = () => {
-  store.commit("removeUser");
-  document.cookie =
-    "syscutToken=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; SameSite=Lax;";
-  window.location.reload();
+  axios
+    .post("do/logout")
+    .then((e) => {
+      showErrorMessage(e);
+    })
+    .then((e) => {
+      showErrorMessage(e);
+    })
+    .finally(() => {
+      store.commit("removeUser");
+      window.location.reload();
+    });
 };
 const headerButtonCtrl = (menu = { icon: "" }) => {
   if (menu.icon == "login") {
@@ -120,7 +141,11 @@ const showErrorMessage = (e) => {
   // $q.loading.hide();
   errDialog.value = true;
   errMessage.value =
-    e?.response?.data?.message || e?.response?.data || e?.message || e;
+    e?.response?.data?.message ||
+    e?.response?.data ||
+    e?.message ||
+    e?.data ||
+    e;
   window.setInterval(() => {
     errDialog.value = false;
   }, 5000);

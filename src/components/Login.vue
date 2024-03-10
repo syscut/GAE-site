@@ -1,6 +1,8 @@
 <script setup>
 // source：https://github.com/AsmrProg-YT/Modern-Login
 import { nextTick, ref, onMounted } from "vue";
+import { useStore } from "vuex";
+import { useQuasar } from "quasar";
 import router from "../router";
 import axios from "axios";
 import CryptoJS from "crypto-js";
@@ -44,6 +46,8 @@ const isPwdN = ref(true);
 const displayLoginForm = ref("");
 const leftSize = ref("left: 60%;");
 const staticMsg = ref("");
+const store = useStore();
+const $q = useQuasar();
 // methods ----------------------------------------------------------
 const login = () => {
   const key = CryptoJS.enc.Utf8.parse("aK7+UX24ttB=fTnA");
@@ -59,9 +63,10 @@ const login = () => {
       password: encrypted.toString(),
     })
     .then((e) => {
-      // router.push("/");
-      // router.go();
       staticMsg.value = "";
+      let pushTo = store.state.redirect == "" ? "home" : store.state.redirect;
+      router.push({ name: pushTo });
+      // router.go();
     })
     .catch((e) => {
       let errorMsg = e?.response?.data?.ErrorMessage;
@@ -92,14 +97,24 @@ const append = (targrt = "") => {
       <div class="container" id="container">
         <div class="form-container sign-up">
           <form action="">
-            <h3 class="text-white" style="line-height: 0.125rem">註冊</h3>
+            <h3
+              class="text-white"
+              style="
+                line-height: 0.125rem;
+                margin-bottom: 30px;
+                margin-top: 0px;
+              "
+            >
+              註冊
+            </h3>
+            <span class="text-red">★目前尚未開放註冊功能★</span>
             <div class="row">
               <div class="col-12 q-pb-sm">
                 <q-input
                   dense
                   rounded
                   outlined
-                  color="grey-1"
+                  color="black"
                   label-color="black"
                   bg-color="grey-1"
                   placeholder="帳號"
@@ -111,7 +126,7 @@ const append = (targrt = "") => {
                   dense
                   rounded
                   outlined
-                  color="grey-1"
+                  color="black"
                   label-color="black"
                   bg-color="grey-1"
                   :type="isPwdN ? 'password' : 'text'"
@@ -132,7 +147,7 @@ const append = (targrt = "") => {
                   dense
                   rounded
                   outlined
-                  color="grey-1"
+                  color="black"
                   label-color="black"
                   bg-color="grey-1"
                   :type="isPwdN ? 'password' : 'text'"
@@ -154,7 +169,7 @@ const append = (targrt = "") => {
                   rounded
                   outlined
                   type="email"
-                  color="grey-1"
+                  color="black"
                   label-color="black"
                   bg-color="grey-1"
                   placeholder="Email"
@@ -168,7 +183,7 @@ const append = (targrt = "") => {
                   outlined
                   stack-label
                   type="date"
-                  color="grey-1"
+                  color="black"
                   label-color="black"
                   bg-color="grey-1"
                   label="生日"
@@ -200,7 +215,8 @@ const append = (targrt = "") => {
                 <q-input
                   rounded
                   outlined
-                  color="grey-1"
+                  color="black"
+                  input-style="background-color: #ffffff"
                   label-color="black"
                   bg-color="grey-1"
                   v-model="username"
@@ -211,7 +227,7 @@ const append = (targrt = "") => {
                 <q-input
                   rounded
                   outlined
-                  color="grey-1"
+                  color="black"
                   label-color="black"
                   bg-color="grey-1"
                   v-model="password"

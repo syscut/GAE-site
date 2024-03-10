@@ -10,6 +10,8 @@ const state = {
   education: "",
   role: 5,
   isLoading: false,
+  redirect: "",
+  translateText: "",
 };
 
 // mutations are operations that actually mutate the state.
@@ -46,6 +48,12 @@ const mutations = {
   },
   setLoadingState(state, s) {
     state.isLoading = s;
+  },
+  setRedirectUrl(state, url) {
+    state.redirect = url;
+  },
+  removeRedirectUrl(state) {
+    state.redirect = "";
   },
 };
 // actions are functions that cause side effects and can involve
