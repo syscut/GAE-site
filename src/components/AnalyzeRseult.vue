@@ -10,10 +10,8 @@ const tmpTextArray = ref([]);
 const wordType = ref({
   word: "",
   pronounce: "",
-  example: "",
   partOfSpecch: "",
   definition: "",
-  audio: "",
 });
 onMounted(() => {
   if (store.state.translateText == "") {
@@ -77,22 +75,10 @@ const translate = (text = "", dom) => {
 
         wordType.value.word = example[0].word;
         wordType.value.pronounce = example[0]?.phonetic || "";
-        wordType.value.example = responseArray[1].data;
         wordType.value.partOfSpecch =
           example[0]?.meanings[0]?.partOfSpeech || "";
         wordType.value.definition =
           example[0]?.meanings[0]?.definitions[0]?.definition || "";
-
-        wordType.value.audio = arrayBufferToString(responseArray[0].data);
-
-        let buf = stringToArrayBuffer(wordType.value.audio);
-
-        let blob = new Blob([buf], { type: "audio/mp3" });
-        let url = URL.createObjectURL(blob);
-        let audio = new Audio(url);
-        audio.controls = true;
-        audio.playbackRate = 0.8;
-        document.getElementById("testAudio").appendChild(audio);
 
         saveWord(wordType.value);
       };
@@ -109,8 +95,6 @@ const translate = (text = "", dom) => {
     });
 };
 const saveWord = (s = {}) => {
-  console.log(s);
-
   axios
     .post("auth/saveWord", s)
     .then((d) => {
@@ -124,10 +108,7 @@ const getWord = (w = "") => {
   axios
     .post("auth/getWord", { word: w })
     .then((response) => {
-      console.log(response);
-      let buf = stringToArrayBuffer(response.data.audio);
-      console.log(buf);
-      let blob = new Blob([buf], { type: "audio/mp3" });
+      let blob = new Blob([response.data.audio], { type: "audio/mp3" });
       let url = URL.createObjectURL(blob);
       let audio = new Audio(url);
       audio.controls = true;
@@ -155,8 +136,8 @@ const stringToArrayBuffer = (string) => {
   }
   return byteArray;
 };
-const arrayBufferToString = (exportedPrivateKey) => {
-  const byteArray = new Uint8Array(exportedPrivateKey);
+const arrayBufferToString = (arrayBuffer) => {
+  const byteArray = new Uint8Array(arrayBuffer);
   let byteString = "";
   for (var i = 0; i < byteArray.byteLength; i++) {
     byteString += String.fromCodePoint(byteArray[i]);
