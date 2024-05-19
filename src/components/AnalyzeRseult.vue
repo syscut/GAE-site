@@ -9,9 +9,15 @@ const translateTextArray = ref([]);
 const tmpTextArray = ref([]);
 const wordType = ref({
   word: "",
+  translate: "",
   pronounce: "",
+  example: "",
   partOfSpecch: "",
   definition: "",
+});
+const vocabularyCompositeKey = ref({
+  word: "",
+  username: "",
 });
 onMounted(() => {
   if (store.state.translateText == "") {
@@ -44,59 +50,50 @@ const translate = (text = "", dom) => {
     dom.target.nextSibling.style.display = "block";
     return;
   }
+  vocabularyCompositeKey.value.username = store.state.username;
+  vocabularyCompositeKey.value.word = text;
+
+  const translated = axios.post("auth/translate", { t: text });
+
   const voiceData = axios.post(
     "auth/pronounce",
     { t: text },
     { responseType: "arraybuffer" }
   );
 
-  const translated = axios.post(
-    "auth/translate",
-    { t: text },
-    {
-      responseType: "text/plain",
-    }
-  );
+  // const example = axios.get(
+  //   "https://api.dictionaryapi.dev/api/v2/entries/en/" + text,
+  //   {
+  //     withCredentials: false,
+  //   }
+  // );
 
-  const example = axios.get(
-    "https://api.dictionaryapi.dev/api/v2/entries/en/" + text,
-    {
-      withCredentials: false,
-    }
-  );
-
-  Promise.all([voiceData, translated, example])
+  Promise.all([translated, voiceData])
     .then((responseArray) => {
       let saveBtn = dom.target.nextSibling.children[1].children[0];
       let getBtn = dom.target.nextSibling.children[1].children[1];
       let deleteBtn = dom.target.nextSibling.children[1].children[2];
+
       saveBtn.onclick = () => {
-        const example = responseArray[2].data;
-
-        wordType.value.word = example[0].word;
-        wordType.value.pronounce = example[0]?.phonetic || "";
-        wordType.value.partOfSpecch =
-          example[0]?.meanings[0]?.partOfSpeech || "";
-        wordType.value.definition =
-          example[0]?.meanings[0]?.definitions[0]?.definition || "";
-
-        saveWord(wordType.value);
+        saveWord();
       };
       getBtn.onclick = () => {
-        getWord(responseArray[2].data[0].word);
+        getWord();
       };
       deleteBtn.onclick = () => {
-        deleteWord(responseArray[2].data[0].word);
+        deleteWord();
       };
+
+      // ---genetate dom
       domUtils.generate(responseArray, dom);
     })
     .catch((e) => {
       console.error(e);
     });
 };
-const saveWord = (s = {}) => {
+const saveWord = () => {
   axios
-    .post("auth/saveWord", s)
+    .post("auth/saveWord", vocabularyCompositeKey.value)
     .then((d) => {
       console.log(d.data);
     })
@@ -104,45 +101,31 @@ const saveWord = (s = {}) => {
       console.log(e);
     });
 };
-const getWord = (w = "") => {
+const getWord = () => {
   axios
-    .post("auth/getWord", { word: w })
+    .post("auth/getWord", vocabularyCompositeKey.value)
     .then((response) => {
-      let blob = new Blob([response.data.audio], { type: "audio/mp3" });
-      let url = URL.createObjectURL(blob);
-      let audio = new Audio(url);
-      audio.controls = true;
-      audio.playbackRate = 0.8;
-      document.getElementById("testAudio").appendChild(audio);
-    })
-    .catch((e) => {
-      console.log(e);
-    });
-};
-const deleteWord = (w = "") => {
-  axios
-    .post("auth/deleteWord", { word: w })
-    .then((response) => {
+      // let blob = new Blob([response.data.audio], { type: "audio/mp3" });
+      // let url = URL.createObjectURL(blob);
+      // let audio = new Audio(url);
+      // audio.controls = true;
+      // audio.playbackRate = 0.8;
+      // document.getElementById("testAudio").appendChild(audio);
       console.log(response.data);
     })
     .catch((e) => {
       console.log(e);
     });
 };
-const stringToArrayBuffer = (string) => {
-  let byteArray = new Uint8Array(string.length);
-  for (var i = 0; i < string.length; i++) {
-    byteArray[i] = string.codePointAt(i);
-  }
-  return byteArray;
-};
-const arrayBufferToString = (arrayBuffer) => {
-  const byteArray = new Uint8Array(arrayBuffer);
-  let byteString = "";
-  for (var i = 0; i < byteArray.byteLength; i++) {
-    byteString += String.fromCodePoint(byteArray[i]);
-  }
-  return byteString;
+const deleteWord = () => {
+  axios
+    .post("auth/deleteWord", vocabularyCompositeKey.value)
+    .then((response) => {
+      console.log(response.data);
+    })
+    .catch((e) => {
+      console.log(e);
+    });
 };
 </script>
 <template>

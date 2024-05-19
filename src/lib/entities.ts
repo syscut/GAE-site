@@ -1,8 +1,8 @@
 export type wordType = {
   word: string;
+  translate: string;
   pronounce: string;
   example: string;
-  audio: any;
   partOfSpecch: string;
   definition: string;
 };
