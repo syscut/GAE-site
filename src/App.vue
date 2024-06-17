@@ -25,16 +25,17 @@ const width = ref(window.innerWidth);
 const height = ref(window.innerHeight - 50);
 const headerNotHide = ref(true);
 const errDialog = ref(false);
+const hoverMenu = ref(false);
+const hoverDrawerMenu = ref(false);
 const searchText = ref("");
 const errMessage = ref("");
 const menuItems = ref([
-  { id: 0, name: "翻譯功能", icon: "translate", to: "translate" },
-  { id: 1, name: "文章分類", icon: "article", to: "articleGroup" },
-  { id: 2, name: "關於我", icon: "person", to: "aboutMe" },
-  { id: 3, name: "separator", icon: "none" },
-  { id: 4, name: "新增文章", icon: "post_add", to: "newArticle", ajax: true },
-  { id: 5, name: "登入 / 註冊", icon: "login", to: "login" },
-  { id: 6, name: "登出", icon: "logout" },
+  { id: 0, name: "文章分類", icon: "article", to: "articleGroup" },
+  { id: 1, name: "關於我", icon: "person", to: "aboutMe" },
+  { id: 2, name: "separator", icon: "none" },
+  { id: 3, name: "新增文章", icon: "post_add", to: "newArticle", ajax: true },
+  { id: 4, name: "登入 / 註冊", icon: "login", to: "login" },
+  { id: 5, name: "登出", icon: "logout" },
 ]);
 //setting---------------------
 onBeforeMount(() => {});
@@ -133,6 +134,17 @@ const headerHide = (notHide) => {
 };
 const toggleLeftDrawer = () => {
   leftDrawerOpen.value = !leftDrawerOpen.value;
+  const parentElement = document.getElementById("translateDrawerMenu");
+  const childElements = parentElement.getElementsByClassName("justify-center");
+  Array.from(childElements).forEach((element) => {
+    if (element.classList.contains("justify-center")) {
+      element.classList.remove("justify-center");
+      const e = element.getElementsByClassName("block");
+      Array.from(e).forEach((e2) => {
+        e2.style.paddingLeft = "18px";
+      });
+    }
+  });
 };
 const search = () => {
   showErrorMessage(searchText.value);
@@ -199,6 +211,40 @@ const showErrorMessage = (e) => {
             </q-input>
           </form>
         </div>
+        <div>
+          <q-btn-dropdown
+            flat
+            rounded
+            v-model="hoverMenu"
+            v-show="headerButtonCtrl()"
+            @mouseover="hoverMenu = true"
+            class="q-px-md"
+            label="單字功能"
+          >
+            <q-list class="bg-dark text-white">
+              <q-item clickable v-ripple v-close-popup to="translate">
+                <q-item-section avatar>
+                  <q-icon name="translate" />
+                </q-item-section>
+                <q-item-section> 翻譯 </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup to="myVocabulary">
+                <q-item-section avatar>
+                  <q-icon name="abc" />
+                </q-item-section>
+                <q-item-section> 我的單字 </q-item-section>
+              </q-item>
+
+              <q-item clickable v-close-popup to="exam">
+                <q-item-section avatar>
+                  <q-icon name="fact_check" />
+                </q-item-section>
+                <q-item-section> 測驗 </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </div>
         <div v-for="menu in menuItems" :key="menu.id">
           <q-btn
             :to="menu.to"
@@ -237,6 +283,38 @@ const showErrorMessage = (e) => {
       overlay
     >
       <q-scroll-area class="fit">
+        <q-btn-dropdown
+          id="translateDrawerMenu"
+          flat
+          v-model="hoverDrawerMenu"
+          style="width: 100%; height: 48px"
+          label="單字功能"
+          icon="language"
+          menu-self="center left"
+        >
+          <q-list class="bg-dark text-white">
+            <q-item clickable v-ripple v-close-popup to="translate">
+              <q-item-section avatar>
+                <q-icon name="translate" />
+              </q-item-section>
+              <q-item-section> 翻譯 </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup to="myVocabulary">
+              <q-item-section avatar>
+                <q-icon name="abc" />
+              </q-item-section>
+              <q-item-section> 我的單字 </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup to="exam">
+              <q-item-section avatar>
+                <q-icon name="fact_check" />
+              </q-item-section>
+              <q-item-section> 測驗 </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
         <q-list v-for="menu in menuItems" :key="menu.id">
           <q-item
             v-if="drawerButtonCtrl(menu)"

@@ -71,19 +71,22 @@ const translate = (text = "", dom) => {
   Promise.all([translated, voiceData])
     .then((responseArray) => {
       let saveBtn = dom.target.nextSibling.children[1].children[0];
-      let getBtn = dom.target.nextSibling.children[1].children[1];
-      let deleteBtn = dom.target.nextSibling.children[1].children[2];
-
+      let closeBtn = dom.target.nextSibling.children[1].children[1];
+      // let getBtn = dom.target.nextSibling.children[1].children[1];
+      // let deleteBtn = dom.target.nextSibling.children[1].children[2];
       saveBtn.onclick = () => {
-        saveWord();
+        saveWord(closeBtn);
       };
-      getBtn.onclick = () => {
-        getWord();
+      closeBtn.onclick = () => {
+        dom.target.nextSibling.style.display = "none";
       };
-      deleteBtn.onclick = () => {
-        deleteWord();
-      };
-
+      // getBtn.onclick = () => {
+      //   getWord();
+      // };
+      // deleteBtn.onclick = () => {
+      //   deleteWord();
+      // };
+      console.log(responseArray);
       // ---genetate dom
       domUtils.generate(responseArray, dom);
     })
@@ -91,11 +94,13 @@ const translate = (text = "", dom) => {
       console.error(e);
     });
 };
-const saveWord = () => {
+const saveWord = (closeBtn = {}) => {
   axios
     .post("auth/saveWord", vocabularyCompositeKey.value)
     .then((d) => {
       console.log(d.data);
+      emitErrMsg("單字 " + vocabularyCompositeKey.value.word + " 存檔成功 !");
+      closeBtn.click();
     })
     .catch((e) => {
       console.log(e);
@@ -133,7 +138,7 @@ const deleteWord = () => {
     <div class="col-xs-12 col-sm-10 col-md-8">
       <q-card class="article-background" dark flat square>
         <q-card-section>
-          <div class="text-h4 q-mb-sm">翻譯結果Demo</div>
+          <div class="text-h4 q-mb-sm">點擊欲翻譯之單字</div>
           <div id="testAudio"></div>
           <template v-for="text in tmpTextArray">
             <template v-if="text == '\n'">
@@ -150,7 +155,7 @@ const deleteWord = () => {
               <button
                 flat
                 class="text-h5 translateBtn"
-                @click="translate(text, $event)"
+                @click="translate(text.toLowerCase(), $event)"
               >
                 {{ text }}
               </button>
@@ -158,7 +163,7 @@ const deleteWord = () => {
                 <div></div>
                 <q-card-actions align="around">
                   <q-btn style="width: 70px" color="primary" label="儲存" />
-                  <q-btn style="width: 70px" color="warn" label="刪除" />
+                  <!-- <q-btn style="width: 70px" color="warn" label="刪除" /> -->
                   <q-btn style="width: 70px" color="red" label="關閉" />
                 </q-card-actions>
               </q-card>

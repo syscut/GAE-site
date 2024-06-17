@@ -107,7 +107,7 @@ const append = (targrt = "") => {
             >
               註冊
             </h3>
-            <span class="text-red">★目前尚未開放註冊功能★</span>
+            <!-- <span class="text-red">★目前尚未開放註冊功能★</span> -->
             <div class="row">
               <div class="col-12 q-pb-sm">
                 <q-input

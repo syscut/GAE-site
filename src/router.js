@@ -40,6 +40,24 @@ const routes = [
     meta: { requireAuth: true },
     component: () => import("./components/AnalyzeRseult.vue"),
   },
+  {
+    path: "/myVocabulary",
+    name: "myVocabulary",
+    meta: { requireAuth: true },
+    component: () => import("./components/MyVocabulary.vue"),
+  },
+  {
+    path: "/exam",
+    name: "exam",
+    meta: { requireAuth: true },
+    component: () => import("./components/Exam.vue"),
+  },
+  {
+    path: "/examResult",
+    name: "examResult",
+    meta: { requireAuth: true },
+    component: () => import("./components/ExamResult.vue"),
+  },
 ];
 
 const setUser = (

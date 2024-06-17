@@ -54,7 +54,7 @@ const analyze = () => {
       <q-card class="article-background" dark flat square>
         <q-card-section>
           <div>
-            <span class="text-h4 q-mb-sm"> 翻譯Demo</span>
+            <span class="text-h4 q-mb-sm"> 翻譯</span>
             <span class="stickyRow">
               <div id="recordedAudio"></div>
               <q-btn

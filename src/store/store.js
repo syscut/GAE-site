@@ -12,6 +12,8 @@ const state = {
   isLoading: false,
   redirect: "",
   translateText: "",
+  select: [],
+  exam: [],
 };
 
 // mutations are operations that actually mutate the state.

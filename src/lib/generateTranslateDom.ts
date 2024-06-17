@@ -6,7 +6,6 @@ const generate = (dataArray: Array<response>, dom: any): void => {
   const translated = dataArray[0].data;
   const voiceData = dataArray[1].data;
 
-  console.log(dom);
   // close btn
   let closeBtn = document.createElement("button");
 
